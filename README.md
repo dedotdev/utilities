@@ -1,2 +1,2 @@
-# @dedot/ui
+# Dedot's Utilities
 
