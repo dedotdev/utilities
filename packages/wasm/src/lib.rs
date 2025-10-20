@@ -149,6 +149,19 @@ fn get_metadata(wasm: HexString) -> Result<HexString, String> {
     Ok(metadata)
 }
 
+// TypeScript type definitions
+#[wasm_bindgen(typescript_custom_section)]
+const TS_APPEND_CONTENT: &'static str = r#"
+type HexString = `0x${string}`
+
+/**
+ * Get metadata from WASM runtime.
+ *
+ * @param {HexString} wasmBlob - The runtime WASM blob as a hex string
+ * @returns {HexString} The runtime metadata as a hex string
+ */
+export function getMetadataFromWasmRuntime(wasmBlob: HexString): HexString"#;
+
 /// Get metadata from WASM runtime.
 ///
 /// This function extracts metadata from a Substrate/Polkadot runtime WASM blob.
@@ -157,7 +170,7 @@ fn get_metadata(wasm: HexString) -> Result<HexString, String> {
 ///
 /// @param {HexString} wasmBlob - The runtime WASM blob as a hex string
 /// @returns {HexString} The runtime metadata as a hex string
-#[wasm_bindgen(js_name = getMetadataFromWasmRuntime)]
+#[wasm_bindgen(js_name = getMetadataFromWasmRuntime, skip_typescript)]
 pub fn get_metadata_from_wasm_runtime(wasm_blob: JsValue) -> Result<JsValue, JsValue> {
     let wasm = serde_wasm_bindgen::from_value::<HexString>(wasm_blob)?;
 
