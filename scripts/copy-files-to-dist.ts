@@ -22,11 +22,14 @@ const main = () => {
 
     if (file === 'package.json') {
       const pkgJson = JSON.parse(fileContent);
-      pkgJson.main = '';
-      pkgJson.module = './index.js';
-      pkgJson.types = './index.d.ts';
 
-      fileContent = JSON.stringify(pkgJson, null, 2);
+      if (!['@dedot/wasm'].includes(pkgJson.name)) {
+        pkgJson.main = '';
+        pkgJson.module = './index.js';
+        pkgJson.types = './index.d.ts';
+
+        fileContent = JSON.stringify(pkgJson, null, 2);
+      }
     }
 
     fs.writeFileSync(path.join(currentDir, targetDir, file), fileContent);

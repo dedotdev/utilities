@@ -1,0 +1,22 @@
+{
+  "name": "@dedot/wasm",
+  "description": "WASM utilities",
+  "author": "Thang Vu <thang@dedot.dev>",
+  "version": "0.1.0",
+  "scripts": {
+    "build": "wasm-pack build --target nodejs --out-dir dist",
+    "clean": "rm -rf ./dist"
+  },
+  "files": [
+    "wasm_bg.wasm",
+    "wasm.js",
+    "wasm.d.ts"
+  ],
+  "main": "wasm.js",
+  "types": "wasm.d.ts",
+  "publishConfig": {
+    "access": "public",
+    "directory": "dist"
+  },
+  "license": "MIT"
+}
