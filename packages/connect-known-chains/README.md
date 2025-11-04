@@ -1,0 +1,1 @@
+# @dedot/connect-known-chains
