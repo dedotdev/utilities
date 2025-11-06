@@ -3,7 +3,12 @@ name: chain-specs-periodic-update
 on:
   schedule:
     - cron: '0 8 * * *' # every day at 8am
-  workflow_dispatch: # allow triggering through the UI
+  workflow_dispatch: # allow manual trigger from the UI
+
+permissions:
+  contents: write # allow pushing commits and branches
+  pull-requests: write # allow creating or updating pull requests
+  issues: write # allow creating issues on failure
 
 jobs:
   download-spec:
@@ -11,7 +16,6 @@ jobs:
 
     strategy:
       matrix:
-        # This starts one parallel job for each of these addresses.
         rpc-node-address:
           [
             'wss://rpc.polkadot.io',
@@ -20,7 +24,7 @@ jobs:
             'wss://rococo-rpc.polkadot.io',
             'wss://rpc.dotters.network/paseo',
           ]
-      fail-fast: false # Don't automatically cancel the jobs of the other RPC nodes if one fails
+      fail-fast: false
 
     steps:
       - uses: actions/checkout@v4
@@ -28,51 +32,68 @@ jobs:
           persist-credentials: false
           path: repo
           ref: main
-      - run: |
+
+      - name: Install websocat
+        run: |
           curl -L -O https://github.com/vi/websocat/releases/download/v1.9.0/websocat_linux64
           chmod +x websocat_linux64
-      - run: |
-          echo '{"id":1,"jsonrpc":"2.0","method":"sync_state_genSyncSpec","params":[true]}' |
-            ./websocat_linux64 -n1 -B 99999999 ${{ matrix.rpc-node-address }} > rpc_answer.json
-      - run: cat ./rpc_answer.json | jq .result > chain_spec.json
-      - id: get-chain-id # Reads the `id` field in the newly-downloaded chain spec
-        run: echo "id=`jq -r .id ./chain_spec.json`" >> $GITHUB_OUTPUT
-      - if: ${{ steps.get-chain-id.outputs.id == '' }}
+
+      - name: Download chain spec
+        run: |
+          echo '{"id":1,"jsonrpc":"2.0","method":"sync_state_genSyncSpec","params":[true]}' \
+            | ./websocat_linux64 -n1 -B 99999999 ${{ matrix.rpc-node-address }} > rpc_answer.json
+
+      - name: Extract chain spec result
+        run: cat ./rpc_answer.json | jq .result > chain_spec.json
+
+      - name: Get chain ID
+        id: get-chain-id
+        run: echo "id=$(jq -r .id ./chain_spec.json)" >> $GITHUB_OUTPUT
+
+      - name: Upload failed response
+        if: ${{ steps.get-chain-id.outputs.id == '' }}
         uses: actions/upload-artifact@v4
         with:
           name: failed-response-${{ github.run_id }}
-          path: |
-            rpc_answer.json
-      - run:
-          | # Overwrite the `lightSyncState` field of the existing chain spec with the value of spec that's been downloaded.
+          path: rpc_answer.json
+
+      - name: Update chain spec file
+        if: ${{ steps.get-chain-id.outputs.id != '' }}
+        run: |
           tmp=$(mktemp)
-          output=./repo/packages/connect/specs/${{ steps.get-chain-id.outputs.id }}.json
-          jq --slurpfile downloaded ./chain_spec.json '.lightSyncState = $downloaded[0].lightSyncState' "$output" > "$tmp"
+          output="./repo/packages/connect-known-chains/specs/${{ steps.get-chain-id.outputs.id }}.json"
+          jq --slurpfile downloaded ./chain_spec.json \
+            '.lightSyncState = $downloaded[0].lightSyncState' "$output" > "$tmp"
           mv "$tmp" "$output"
-      - uses: actions/upload-artifact@v4
+
+      - name: Upload updated chain spec
+        uses: actions/upload-artifact@v4
         with:
           name: chain-spec-${{ steps.get-chain-id.outputs.id }}
-          # Note that passing `repo/**` maintains paths under `repo`. This is a bit of magic by the upload-artifact action.
-          path: |
-            repo/**/${{ steps.get-chain-id.outputs.id }}.json
+          path: repo/**/${{ steps.get-chain-id.outputs.id }}.json
 
   create-pr:
     runs-on: ubuntu-latest
-    if: ${{ always() }} # Run this job even if one of the steps of download-spec has failed
+    if: ${{ always() }}
     needs: download-spec
+
     steps:
-      - uses: actions/checkout@v4.1.7
+      - uses: actions/checkout@v4
         with:
           path: repo
           ref: main
+
       - uses: actions/download-artifact@v4
         with:
-          # Since we're not passing a name, this automatically downloads *all* artifacts
-          # Unfortunately, this creates intermediary directories.
           path: .
-      - run: cp -r ./chain-spec-*/* ./repo
-      - uses: peter-evans/create-pull-request@v6
+
+      - name: Copy updated specs
+        run: |
+          cp -r ./chain-spec-*/* ./repo
+
+      - name: Create Pull Request
         id: create-pr
+        uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           committer: debot <hi@coongcrafts.io>
@@ -81,27 +102,26 @@ jobs:
           branch: automatic-checkpoints-update
           base: main
           title: 'chore: update chain specifications'
-          # Note that the `download-spec` job above fails if the downloaded specification doesn't
-          # correspond to an existing file. It is therefore impossible that the pull request
-          # accidentally adds new specifications.
-          body: >
+          body: |
             This pull request has been automatically generated by downloading chain
             specifications from various JSON-RPC endpoints and extracting their checkpoints.
 
-            Keep in mind that introducing a malicious checkpoint can redirect users to the wrong
-            chain. If this pull request looks suspicious, please be cautious.
+            ⚠️ Keep in mind that introducing a malicious checkpoint can redirect users to the wrong chain.
+            If this pull request looks suspicious, please be cautious.
           commit-message: 'chore: update checkpoints in chain specifications'
           delete-branch: true
-      - name: Check PR creation status
-        if: steps.create-pr.outcome != 'success'
+
+      - name: Verify PR creation
+        if: ${{ steps.create-pr.outcome != 'success' }}
         run: |
           echo "Failed to create pull request"
           exit 1
+
       - name: Create issue on failure
         if: failure()
         uses: actions/github-script@v7
         with:
-          github-token: ${{ steps.gen_token.outputs.token }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             github.rest.issues.create({
               owner: context.repo.owner,
