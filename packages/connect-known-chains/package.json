@@ -5,12 +5,11 @@
   "author": "Tung Vu <tung@dedot.dev>",
   "license": "GPL-3.0-only",
   "type": "module",
-  "main": "./dist/index.js",
+  "main": "src/index.ts",
   "scripts": {
     "build-js-specs": "node scripts/build-js-specs.js",
     "build": "yarn clean && yarn build-js-specs && tsc --project tsconfig.build.json",
-    "clean": "rm -rf ./dist && rm -rf ./tsconfig.tsbuildinfo ./tsconfig.build.tsbuildinfo",
-    "lint": "eslint . --ext .js,.ts"
+    "clean": "rm -rf ./dist && rm -rf ./tsconfig.tsbuildinfo ./tsconfig.build.tsbuildinfo"
   },
   "devDependencies": {
     "typescript": "5.6.2"
