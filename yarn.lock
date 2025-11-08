@@ -212,9 +212,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@dedot/connect-known-chains@workspace:packages/connect-known-chains":
+"@dedot/chain-specs@workspace:packages/chain-specs":
   version: 0.0.0-use.local
-  resolution: "@dedot/connect-known-chains@workspace:packages/connect-known-chains"
+  resolution: "@dedot/chain-specs@workspace:packages/chain-specs"
   dependencies:
     "@dedot/providers": "npm:^0.18.5"
     smoldot: "npm:^2.0.39"
