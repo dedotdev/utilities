@@ -1,9 +1,8 @@
 {
-  "name": "@dedot/connect-known-chains",
+  "name": "@dedot/chain-specs",
   "version": "0.0.1",
   "description": "Substrate-connect well known chain specifications",
   "author": "Tung Vu <tung@dedot.dev>",
-  "license": "GPL-3.0-only",
   "type": "module",
   "main": "src/index.ts",
   "scripts": {
@@ -12,10 +11,13 @@
     "clean": "rm -rf ./dist && rm -rf ./tsconfig.tsbuildinfo ./tsconfig.build.tsbuildinfo"
   },
   "devDependencies": {
+    "@dedot/providers": "^0.18.5",
+    "smoldot": "^2.0.39",
     "typescript": "5.6.2"
   },
   "publishConfig": {
     "access": "public",
     "directory": "dist"
-  }
+  },
+  "license": "MIT"
 }
