@@ -116,7 +116,7 @@ jobs:
         working-directory: repo
         run: |
           git config user.name "debot"
-          git config user.email "hi@coongcrafts.io"
+          git config user.email "hi@dedot.dev"
 
           # Add all changes if any
           if [ -n "$(git status --porcelain)" ]; then
