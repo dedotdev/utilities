@@ -4,6 +4,8 @@ A collection of well-known chain specifications for connecting to Polkadot, Kusa
 
 This package provides optimized chain specs with full ESM and CommonJS support via subpath exports, allowing you to import individual network specifications on-demand.
 
+This package is a fork of [@substrate/connect-known-chains](https://github.com/paritytech/substrate-connect/tree/main/packages/connect-known-chains) with customizations!
+
 ## Installation
 
 ```bash
@@ -71,7 +73,3 @@ For more information on connecting to networks with Dedot and Smoldot, visit the
 ## License
 
 MIT
-
----
-
-A fork of [@substrate/connect-known-chains](https://github.com/paritytech/substrate-connect/tree/main/packages/connect-known-chains) with customizations!
