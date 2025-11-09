@@ -9,7 +9,7 @@ const specsDir = path.join(__dirname, '../specs');
 const jsDir = path.join(__dirname, '../src/specs/');
 
 try {
-  const files = fs.readFileSync(specsDir);
+  const files = fs.readdirSync(specsDir);
   const jsonFiles = files.filter((file) => file.endsWith('.json'));
 
   if (!fs.existsSync(jsDir)) {

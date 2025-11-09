@@ -7,8 +7,8 @@
   "main": "src/index.ts",
   "scripts": {
     "build-js-specs": "node scripts/build-js-specs.js",
-    "build": "yarn clean && yarn build-js-specs && tsc --project tsconfig.build.json",
-    "clean": "rm -rf ./dist && rm -rf ./tsconfig.tsbuildinfo ./tsconfig.build.tsbuildinfo"
+    "build": "yarn clean && yarn build-js-specs && tsc --project tsconfig.build.json && tsc --project tsconfig.build.cjs.json && rm -rf ./dist/tsconfig.build.cjs.tsbuildinfo",
+    "clean": "rm -rf ./dist && rm -rf ./tsconfig.tsbuildinfo ./tsconfig.build.tsbuildinfo ./tsconfig.build.cjs.tsbuildinfo"
   },
   "devDependencies": {
     "@dedot/providers": "^0.18.5",
