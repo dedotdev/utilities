@@ -20,7 +20,6 @@ jobs:
             'wss://rpc.polkadot.io',
             'wss://kusama-rpc.polkadot.io',
             'wss://westend-rpc.polkadot.io',
-            'wss://rococo-rpc.polkadot.io',
             'wss://rpc.dotters.network/paseo',
           ]
       fail-fast: false
@@ -116,7 +115,7 @@ jobs:
         working-directory: repo
         run: |
           git config user.name "debot"
-          git config user.email "hi@dedot.dev"
+          git config user.email "hello@dedot.dev"
 
           # Add all changes if any
           if [ -n "$(git status --porcelain)" ]; then
@@ -126,17 +125,3 @@ jobs:
           else
             echo "No changes to commit."
           fi
-
-      - name: Create issue on failure
-        if: failure()
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            github.rest.issues.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              title: 'Failed to commit chain spec updates to main',
-              body: 'The commit-to-main step failed in the update-chain-specs workflow. Please investigate the issue.',
-              labels: ['bug']
-            })
