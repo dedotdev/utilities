@@ -1,13 +1,12 @@
-name: update-chain-specs
+name: regen-chain-specs
 
 on:
   schedule:
-    - cron: '0 8 * * *' # every day at 8am
+    - cron: '0 0 */3 * *' # 3 days once
   workflow_dispatch:
 
 permissions:
   contents: write
-  issues: write
 
 jobs:
   download-and-validate-specs:
@@ -107,21 +106,17 @@ jobs:
         with:
           path: .
 
+      - name: Setup GH user
+        run: |
+          git config --global user.email "debot@dedot.dev"
+          git config --global user.name "debot"
+
       - name: Copy updated specs
         run: |
           cp -r ./chain-spec-*/* ./repo
 
-      - name: Commit and push changes
+      - name: Commit changes && publish release
         working-directory: repo
         run: |
-          git config user.name "debot"
-          git config user.email "hello@dedot.dev"
-
-          # Add all changes if any
-          if [ -n "$(git status --porcelain)" ]; then
-            git add .
-            git commit -m "chore: update checkpoints in chain specifications [auto]"
-            git push origin main
-          else
-            echo "No changes to commit."
-          fi
+          git add -A
+          git diff-index --quiet HEAD || { git commit -m "chore: regenerate chain specs" && npx lerna publish minor -m "chore(release): publish %s - [skip ci]" --no-private --yes; }
