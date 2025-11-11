@@ -2,12 +2,11 @@ name: update-chain-specs
 
 on:
   schedule:
-    - cron: '0 8 * * *' # every day at 8am
+    - cron: '0 0 */3 * *' # 3 days once
   workflow_dispatch:
 
 permissions:
   contents: write
-  issues: write
 
 jobs:
   download-and-validate-specs:
@@ -120,7 +119,7 @@ jobs:
           # Add all changes if any
           if [ -n "$(git status --porcelain)" ]; then
             git add .
-            git commit -m "chore: update checkpoints in chain specifications [auto]"
+            git commit -m "feat: update chain specs [auto]"
             git push origin main
           else
             echo "No changes to commit."
