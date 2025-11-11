@@ -65,6 +65,10 @@ import { polkadot, ksmcc3, polkadot_asset_hub } from '@dedot/chain-specs';
 - `westend2_collectives` - Westend Collectives parachain
 - `westend2_people` - Westend People parachain
 - `paseo` - Paseo testnet
+- `paseo_asset_hub` - Paseo Asset Hub
+- `paseo_bridge_hub` - Paseo Bridge Hub
+- `paseo_collectives` - Paseo Collectives
+- `paseo_people` - Paseo People
 
 ## Documentation
 
