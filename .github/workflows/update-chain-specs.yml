@@ -1,4 +1,4 @@
-name: regen-chain-specs
+name: update-chain-specs
 
 on:
   schedule:
@@ -106,17 +106,21 @@ jobs:
         with:
           path: .
 
-      - name: Setup GH user
-        run: |
-          git config --global user.email "debot@dedot.dev"
-          git config --global user.name "debot"
-
       - name: Copy updated specs
         run: |
           cp -r ./chain-spec-*/* ./repo
 
-      - name: Commit changes && publish release
+      - name: Commit and push changes
         working-directory: repo
         run: |
-          git add -A
-          git diff-index --quiet HEAD || { git commit -m "chore: regenerate chain specs" && npx lerna publish minor -m "chore(release): publish %s - [skip ci]" --no-private --yes; }
+          git config user.name "debot"
+          git config user.email "hello@dedot.dev"
+
+          # Add all changes if any
+          if [ -n "$(git status --porcelain)" ]; then
+            git add .
+            git commit -m "feat: update chain specs [auto]"
+            git push origin main
+          else
+            echo "No changes to commit."
+          fi
