@@ -1,6 +1,6 @@
 {
   "name": "@dedot/chain-specs",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "Well-known chain specs for light clients (Smoldot)",
   "author": "Tung Vu <tung@dedot.dev>",
   "type": "module",
